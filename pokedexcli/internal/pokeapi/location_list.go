@@ -20,7 +20,7 @@ func (c *Client) ListLocations(pageURL *string) (RespShallowLocations, error) {
 		if err != nil {
 			return RespShallowLocations{}, err
 		}
-		req.Header.Set("User-Agent", "Pokedex CLI - YourAppName")
+
 		resp, err := c.httpClient.Do(req)
 		if err != nil {
 			return RespShallowLocations{}, err
