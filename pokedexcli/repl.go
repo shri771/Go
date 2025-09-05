@@ -11,7 +11,6 @@ import (
 
 type config struct {
 	pokeapiClient    pokeapi.Client
-	parameter        *string
 	nextLocationsURL *string
 	prevLocationsURL *string
 }
@@ -23,20 +22,15 @@ func startRepl(cfg *config) {
 		reader.Scan()
 
 		words := cleanInput(reader.Text())
-		if (len(words) != 1 || len(words) == 1) && words[0] == "explore" {
-			if len(words) != 2 {
-				fmt.Println("Enter a only one argument")
-				continue
-			} else {
-				cfg.parameter = &words[1]
-			}
+		args := []string{}
+		if len(words) > 1 {
+			args = words[1:]
 		}
-
 		commandName := words[0]
 
 		command, exists := getCommands()[commandName]
 		if exists {
-			err := command.callback(cfg)
+			err := command.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -57,7 +51,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommands() map[string]cliCommand {
