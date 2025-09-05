@@ -7,10 +7,12 @@ import (
 
 func commandMapf(cfg *config) error {
 	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
+
 	if err != nil {
 		return err
 	}
 
+	// Setting the values decoded by the ListLocations func
 	cfg.nextLocationsURL = locationsResp.Next
 	cfg.prevLocationsURL = locationsResp.Previous
 

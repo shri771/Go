@@ -11,6 +11,7 @@ import (
 
 type config struct {
 	pokeapiClient    pokeapi.Client
+	parameter        *string
 	nextLocationsURL *string
 	prevLocationsURL *string
 }
@@ -22,8 +23,13 @@ func startRepl(cfg *config) {
 		reader.Scan()
 
 		words := cleanInput(reader.Text())
-		if len(words) == 0 {
-			continue
+		if (len(words) != 1 || len(words) == 1) && words[0] == "explore" {
+			if len(words) != 2 {
+				fmt.Println("Enter a only one argument")
+				continue
+			} else {
+				cfg.parameter = &words[1]
+			}
 		}
 
 		commandName := words[0]
@@ -75,6 +81,11 @@ func getCommands() map[string]cliCommand {
 			name:        "exit",
 			description: "Exit the Pokedex",
 			callback:    commandExit,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Show pokeman matching the parameter",
+			callback:    commandExplore,
 		},
 	}
 }
