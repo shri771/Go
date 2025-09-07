@@ -44,6 +44,9 @@ func main() {
 	cmd.register("register", handlerRegister)
 	cmd.register("reset", handlerReset)
 	cmd.register("users", handlerList)
+	cmd.register("agg", handleragg)
+	cmd.register("addfeed", handlerAddfeed)
+	cmd.register("feeds", handlerListFeeds)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
@@ -55,5 +58,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Create Newclient
+	// rssClient := rssapi.NewClient(5 * time.Second)
 
 }
