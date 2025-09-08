@@ -13,25 +13,23 @@ import (
 )
 
 const createFeedFollow = `-- name: CreateFeedFollow :one
-WITH inserted_feed_follows AS (
-  INSERT INTO feed_follows (id,created_at,updated_at,user_id,feed_id)
-  VALUES (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5
+WITH
+  inserted_feed_follows AS (
+    INSERT INTO
+      feed_follows (id, created_at, updated_at, user_id, feed_id)
+    VALUES
+      ($1, $2, $3, $4, $5)
+    RETURNING
+      id, created_at, updated_at, user_id, feed_id
   )
-  RETURNING id, created_at, updated_at, user_id, feed_id
-)
-SELECT inserted_feed_follows.id, inserted_feed_follows.created_at, inserted_feed_follows.updated_at, inserted_feed_follows.user_id, inserted_feed_follows.feed_id,
-        feeds.name AS feed_name,
-        users.name AS user_name
-FROM inserted_feed_follows
-INNER JOIN users
-ON inserted_feed_follows.user_id = users.id
-INNER JOIN feeds
-ON inserted_feed_follows.feed_id = feeds.id
+SELECT
+  inserted_feed_follows.id, inserted_feed_follows.created_at, inserted_feed_follows.updated_at, inserted_feed_follows.user_id, inserted_feed_follows.feed_id,
+  feeds.name AS feed_name,
+  users.name AS user_name
+FROM
+  inserted_feed_follows
+  INNER JOIN users ON inserted_feed_follows.user_id = users.id
+  INNER JOIN feeds ON inserted_feed_follows.feed_id = feeds.id
 `
 
 type CreateFeedFollowParams struct {
@@ -69,6 +67,33 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 		&i.FeedID,
 		&i.FeedName,
 		&i.UserName,
+	)
+	return i, err
+}
+
+const delfollowingByUrl = `-- name: DelfollowingByUrl :one
+DELETE FROM feed_follows
+WHERE
+  user_id = $1
+  AND feed_id = $2
+RETURNING
+  id, created_at, updated_at, user_id, feed_id
+`
+
+type DelfollowingByUrlParams struct {
+	UserID uuid.UUID
+	FeedID uuid.UUID
+}
+
+func (q *Queries) DelfollowingByUrl(ctx context.Context, arg DelfollowingByUrlParams) (FeedFollow, error) {
+	row := q.db.QueryRowContext(ctx, delfollowingByUrl, arg.UserID, arg.FeedID)
+	var i FeedFollow
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.FeedID,
 	)
 	return i, err
 }

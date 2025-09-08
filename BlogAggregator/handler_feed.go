@@ -7,22 +7,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shri771/Go/BlogAggregator/internal/database"
-	"github.com/shri771/Go/BlogAggregator/internal/rssapi"
 )
 
-func handleragg(s *state, cmd command) error {
-	feedURL := "https://www.wagslane.dev/index.xml"
-	feed, err := rssapi.FetchFeed(context.Background(), feedURL)
-	if err != nil {
-		return fmt.Errorf("could not list Feed %w", err)
-	}
-
-	fmt.Println(feed)
-	return nil
-
-}
-
-func handlerAddfeed(s *state, cmd command) error {
+func handlerAddfeed(s *state, cmd command, user database.User) error {
 
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("Entere  two arguments")
@@ -33,15 +20,7 @@ func handlerAddfeed(s *state, cmd command) error {
 
 	// Get Current users id
 	ctx := context.Background()
-	id, err := getCurrentUserId(s)
-	if err != nil {
-		return fmt.Errorf("ould ")
-	}
 
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUSerName)
-	if err != nil {
-		return err
-	}
 	// Add Feed
 	feed, err := s.db.AddFeed(ctx, database.AddFeedParams{
 		ID:        uuid.New(),
@@ -49,17 +28,13 @@ func handlerAddfeed(s *state, cmd command) error {
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Url:       url,
-		UserID:    id,
 	})
+	if err != nil {
+		// return fmt.Errorf("could not Add feed to database: %w", err)
+
+	}
 
 	// Create feed follow
-	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		UserID:    user.ID,
-		FeedID:    feed.ID,
-	})
 
 	fmt.Println("Feed created successfully:")
 	printFeed(feed, user)
@@ -82,7 +57,7 @@ func handlerListFeeds(s *state, cmd command) error {
 
 	fmt.Printf("Found %d feeds:\n", len(feeds))
 	for _, feed := range feeds {
-		user, err := s.db.GetUserById(context.Background(), feed.UserID)
+		user, err := s.db.GetUserById(context.Background(), feed.ID)
 		if err != nil {
 			return fmt.Errorf("couldn't get user: %w", err)
 		}

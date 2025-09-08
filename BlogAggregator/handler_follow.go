@@ -9,7 +9,7 @@ import (
 	"github.com/shri771/Go/BlogAggregator/internal/database"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return fmt.Errorf("Entere atleast two argumets")
 	}
@@ -17,10 +17,6 @@ func handlerFollow(s *state, cmd command) error {
 	url := cmd.Args[0]
 
 	// Find user ID
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUSerName)
-	if err != nil {
-		return fmt.Errorf("Could not retriew the user: %w", err)
-	}
 
 	// Find feed id
 	feed_id, err := s.db.GetFeedIdByUrl(context.Background(), url)
@@ -51,8 +47,30 @@ func handlerFollwing(s *state, cmd command) error {
 
 	// fmt.Printf("Follwing For user %v: \n", s.cfg.CurrentUSerName)
 	for _, feed := range follwing {
-		fmt.Println(feed)
+		fmt.Println(feed.Name)
 	}
 	return nil
 
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("Enter atlest one arguments")
+	}
+
+	url := cmd.Args[0]
+
+	feedID, err := s.db.GetFeedIdByUrl(context.Background(), url)
+	if err != nil {
+		return fmt.Errorf("could not get the url for feed: %w", err)
+	}
+	CurrentUSerName := user.ID
+
+	_, err = s.db.DelfollowingByUrl(context.Background(), database.DelfollowingByUrlParams{
+		UserID: CurrentUSerName,
+		FeedID: feedID,
+	})
+
+	fmt.Printf("* Successfully unfollowed %v ")
+	return nil
 }

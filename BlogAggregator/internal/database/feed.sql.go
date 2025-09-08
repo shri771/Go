@@ -13,16 +13,12 @@ import (
 )
 
 const addFeed = `-- name: AddFeed :one
-INSERT INTO feeds (id,name,created_at,updated_at,url,user_id)
-VALUES (
-  $1,
-  $2,
-  $3,
-  $4,
-  $5,
-  $6
-)
-RETURNING id, name, created_at, updated_at, url, user_id
+INSERT INTO
+  feeds (id, name, created_at, updated_at, url)
+VALUES
+  ($1, $2, $3, $4, $5)
+RETURNING
+  id, name, created_at, updated_at, url
 `
 
 type AddFeedParams struct {
@@ -31,7 +27,6 @@ type AddFeedParams struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Url       string
-	UserID    uuid.UUID
 }
 
 func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) {
@@ -41,7 +36,6 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Url,
-		arg.UserID,
 	)
 	var i Feed
 	err := row.Scan(
@@ -50,13 +44,15 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Url,
-		&i.UserID,
 	)
 	return i, err
 }
 
 const getFeed = `-- name: GetFeed :many
-SELECT id, name, created_at, updated_at, url, user_id FROM feeds
+SELECT
+  id, name, created_at, updated_at, url
+FROM
+  feeds
 `
 
 func (q *Queries) GetFeed(ctx context.Context) ([]Feed, error) {
@@ -74,7 +70,6 @@ func (q *Queries) GetFeed(ctx context.Context) ([]Feed, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Url,
-			&i.UserID,
 		); err != nil {
 			return nil, err
 		}
@@ -90,26 +85,35 @@ func (q *Queries) GetFeed(ctx context.Context) ([]Feed, error) {
 }
 
 const getFeedFollowsForUser = `-- name: GetFeedFollowsForUser :many
-SELECT feeds.name
-FROM feeds
-LEFT JOIN users
-ON users.id = feeds.user_id
-WHERE users.name = $1
+SELECT
+  feeds.id, feeds.name, feeds.created_at, feeds.updated_at, feeds.url
+FROM
+  users
+  JOIN feed_follows ON users.id = feed_follows.user_id
+  JOIN feeds ON feeds.id = feed_follows.feed_id
+WHERE
+  users.name = $1
 `
 
-func (q *Queries) GetFeedFollowsForUser(ctx context.Context, name string) ([]string, error) {
+func (q *Queries) GetFeedFollowsForUser(ctx context.Context, name string) ([]Feed, error) {
 	rows, err := q.db.QueryContext(ctx, getFeedFollowsForUser, name)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []Feed
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
+		var i Feed
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Url,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, name)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -121,7 +125,12 @@ func (q *Queries) GetFeedFollowsForUser(ctx context.Context, name string) ([]str
 }
 
 const getFeedIdByUrl = `-- name: GetFeedIdByUrl :one
-SELECT id FROM feeds WHERE  url = $1
+SELECT
+  id
+FROM
+  feeds
+WHERE
+  url = $1
 `
 
 func (q *Queries) GetFeedIdByUrl(ctx context.Context, url string) (uuid.UUID, error) {
@@ -132,7 +141,12 @@ func (q *Queries) GetFeedIdByUrl(ctx context.Context, url string) (uuid.UUID, er
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, created_at, updated_at, name FROM users WHERE id = $1
+SELECT
+  id, created_at, updated_at, name
+FROM
+  users
+WHERE
+  id = $1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
