@@ -19,6 +19,7 @@ func handleragg(s *state, cmd command) error {
 
 	fmt.Println(feed)
 	return nil
+
 }
 
 func handlerAddfeed(s *state, cmd command) error {
@@ -49,6 +50,15 @@ func handlerAddfeed(s *state, cmd command) error {
 		UpdatedAt: time.Now().UTC(),
 		Url:       url,
 		UserID:    id,
+	})
+
+	// Create feed follow
+	_, err = s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    user.ID,
+		FeedID:    feed.ID,
 	})
 
 	fmt.Println("Feed created successfully:")

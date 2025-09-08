@@ -47,6 +47,8 @@ func main() {
 	cmd.register("agg", handleragg)
 	cmd.register("addfeed", handlerAddfeed)
 	cmd.register("feeds", handlerListFeeds)
+	cmd.register("follow", handlerFollow)
+	cmd.register("following", handlerFollwing)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
