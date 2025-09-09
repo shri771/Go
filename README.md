@@ -8,10 +8,11 @@ The goal of this repo is to document my journey with Go while building practical
 ---
 
 You will need PostgreSQL and Go installed on your system to run Gator.For Arch-based systems, run the following (for other distributions, refer to your package manager):  
-$ sudo pacman -S go postgresql
+'''$ sudo pacman -S go postgresql'''
 
 
-Set up PostgreSQL and the Go environment:a. Configure PostgreSQL  
+Set up PostgreSQL and the Go environment:
+a. Configure PostgreSQL  
 ```bash
 $ sudo passwd postgres  # Set a password for the PostgreSQL user
 $ sudo systemctl start postgresql.service  # Start the PostgreSQL service
