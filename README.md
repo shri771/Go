@@ -12,7 +12,9 @@ $ sudo pacman -S go postgresql
 
 
 Set up PostgreSQL and the Go environment:a. Configure PostgreSQL  
-```$ sudo passwd postgres  # Set a password for the PostgreSQL user $ sudo systemctl start postgresql.service  # Start the PostgreSQL service```
+```bash
+$ sudo passwd postgres  # Set a password for the PostgreSQL user
+$ sudo systemctl start postgresql.service  # Start the PostgreSQL service```
 
 b. Create the Gator database  
 ```$ sudo -u postgres psql  # Use psql to interact with the database # Inside the psql prompt: $ CREATE DATABASE gator; $ALTER USER postgres PASSWORD 'postgres';```
