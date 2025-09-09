@@ -3,9 +3,9 @@
 This repository contains a collection of my projects, and learning exercises in **Go (Golang)**.  
 The goal of this repo is to document my journey with Go while building practical applications, utilities, and exploring language features like concurrency, modules, and APIs.
 
-##Installing and Running Guide for Blog Aggregator (Gator) ⚡
+## Installing and Running Guide for Blog Aggregator (Gator) ⚡
 ---
-###📦 Installation
+### 📦 Installation
 ---
 
 You will need PostgreSQL and Go installed on your system to run Gator.For Arch-based systems, run the following (for other distributions, refer to your package manager):  
