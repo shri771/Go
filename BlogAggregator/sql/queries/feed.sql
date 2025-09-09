@@ -37,3 +37,24 @@ FROM
   JOIN feeds ON feeds.id = feed_follows.feed_id
 WHERE
   users.name = $1;
+
+-- name: DelFeed :exec
+DELETE FROM feeds;
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET
+  updated_at = $1,
+  last_fetched_at = $2
+WHERE
+  id = $3;
+
+-- name: GetNextToFetch :many
+SELECT
+  *
+FROM
+  feeds
+ORDER BY
+  last_fetched_at DESC NULLS FIRST
+LIMIT
+  1;

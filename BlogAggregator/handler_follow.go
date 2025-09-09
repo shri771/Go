@@ -39,8 +39,8 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	return nil
 }
 
-func handlerFollwing(s *state, cmd command) error {
-	follwing, err := s.db.GetFeedFollowsForUser(context.Background(), s.cfg.CurrentUSerName)
+func handlerFollwing(s *state, cmd command, user database.User) error {
+	follwing, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
 		return fmt.Errorf("could not Get the feed: %v \n", err)
 	}
