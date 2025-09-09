@@ -18,7 +18,7 @@ func handleragg(s *state, cmd command) error {
 		return fmt.Errorf("Could not context input to time.Duratino %w", err)
 	}
 
-	fmt.Printf("Collecting feeds every %v", time_between_reqs)
+	fmt.Printf("Collecting feeds every %v... \n", time_between_reqs)
 
 	ticker := time.NewTicker(time_between_reqs)
 	for range ticker.C {
@@ -43,10 +43,11 @@ func scrapeFeeds(s *state) error {
 	realFeed := feed.Channel
 
 	for _, item := range realFeed.Item {
-		fmt.Printf("* Title: %v \n", item.Title)
-		fmt.Printf("* Link: %v \n", item.Link)
+		fmt.Printf("--------------------------------------------------\n")
+		fmt.Printf(" Title: %v \n", item.Title)
 		fmt.Printf("* Description: %v \n", item.Description)
-		fmt.Printf("* PubDate: %v \n", item.PubDate)
+		fmt.Printf("--------------------------------------------------\n")
+		time.Sleep(2 * time.Second)
 	}
 	return nil
 }
