@@ -2,24 +2,30 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/shri771/Go/BlogAggregator/internal/database"
 	"github.com/shri771/Go/BlogAggregator/internal/rssapi"
 )
 
 func handleragg(s *state, cmd command) error {
-	feedURL := "https://www.wagslane.dev/index.xml"
-	feed, err := rssapi.FetchFeed(context.Background(), feedURL)
-	if err != nil {
-		return fmt.Errorf("could not list Feed %w", err)
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("Enter atlest one argument")
 	}
 
-	fmt.Println(feed)
-	return nil
+	time_between_reqs, err := time.ParseDuration(cmd.Args[0])
+	if err != nil {
+		return fmt.Errorf("Could not context input to time.Duratino %w", err)
+	}
 
+	fmt.Printf("Collecting feeds every %v", time_between_reqs)
+
+	ticker := time.NewTicker(time_between_reqs)
+	for range ticker.C {
+		scrapeFeeds(s)
+	}
+
+	return nil
 }
 
 func scrapeFeeds(s *state) error {
@@ -29,27 +35,18 @@ func scrapeFeeds(s *state) error {
 		return fmt.Errorf("Colud not get next Feed: %w", err)
 	}
 
-	err = s.db.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
-		UpdatedAt: time.Now().UTC(),
-		LastFetchedAt: sql.NullTime{
-			Time:  time.Now().UTC(),
-			Valid: true,
-		},
-		ID: nextFeed[0].ID,
-	})
+	_, err = s.db.MarkFeedFetched(context.Background(), nextFeed.ID)
 
-	feed, err := rssapi.FetchFeed(context.Background(), nextFeed[0].Url)
+	// fmt.Println(addedData)
+	feed, err := rssapi.FetchFeed(context.Background(), nextFeed.Url)
 
 	realFeed := feed.Channel
-	fmt.Printf("*** %v ***", realFeed.Title)
 
 	for _, item := range realFeed.Item {
 		fmt.Printf("* Title: %v \n", item.Title)
 		fmt.Printf("* Link: %v \n", item.Link)
 		fmt.Printf("* Description: %v \n", item.Description)
 		fmt.Printf("* PubDate: %v \n", item.PubDate)
-
 	}
-
 	return nil
 }

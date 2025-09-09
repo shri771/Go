@@ -41,20 +41,22 @@ WHERE
 -- name: DelFeed :exec
 DELETE FROM feeds;
 
--- name: MarkFeedFetched :exec
+-- name: MarkFeedFetched :one
 UPDATE feeds
 SET
-  updated_at = $1,
-  last_fetched_at = $2
+  last_fetched_at = NOW(),
+  updated_at = NOW()
 WHERE
-  id = $3;
+  id = $1
+RETURNING
+  *;
 
--- name: GetNextToFetch :many
+-- name: GetNextToFetch :one
 SELECT
   *
 FROM
   feeds
 ORDER BY
-  last_fetched_at DESC NULLS FIRST
+  last_fetched_at ASC NULLS FIRST
 LIMIT
   1;

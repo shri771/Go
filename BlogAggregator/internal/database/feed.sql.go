@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -153,45 +152,29 @@ func (q *Queries) GetFeedIdByUrl(ctx context.Context, url string) (uuid.UUID, er
 	return id, err
 }
 
-const getNextToFetch = `-- name: GetNextToFetch :many
+const getNextToFetch = `-- name: GetNextToFetch :one
 SELECT
   id, name, created_at, updated_at, url, last_fetched_at
 FROM
   feeds
 ORDER BY
-  last_fetched_at DESC NULLS FIRST
+  last_fetched_at ASC NULLS FIRST
 LIMIT
   1
 `
 
-func (q *Queries) GetNextToFetch(ctx context.Context) ([]Feed, error) {
-	rows, err := q.db.QueryContext(ctx, getNextToFetch)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Feed
-	for rows.Next() {
-		var i Feed
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Url,
-			&i.LastFetchedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetNextToFetch(ctx context.Context) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getNextToFetch)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Url,
+		&i.LastFetchedAt,
+	)
+	return i, err
 }
 
 const getUserById = `-- name: GetUserById :one
@@ -215,22 +198,27 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
-const markFeedFetched = `-- name: MarkFeedFetched :exec
+const markFeedFetched = `-- name: MarkFeedFetched :one
 UPDATE feeds
 SET
-  updated_at = $1,
-  last_fetched_at = $2
+  last_fetched_at = NOW(),
+  updated_at = NOW()
 WHERE
-  id = $3
+  id = $1
+RETURNING
+  id, name, created_at, updated_at, url, last_fetched_at
 `
 
-type MarkFeedFetchedParams struct {
-	UpdatedAt     time.Time
-	LastFetchedAt sql.NullTime
-	ID            uuid.UUID
-}
-
-func (q *Queries) MarkFeedFetched(ctx context.Context, arg MarkFeedFetchedParams) error {
-	_, err := q.db.ExecContext(ctx, markFeedFetched, arg.UpdatedAt, arg.LastFetchedAt, arg.ID)
-	return err
+func (q *Queries) MarkFeedFetched(ctx context.Context, id uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, markFeedFetched, id)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Url,
+		&i.LastFetchedAt,
+	)
+	return i, err
 }
