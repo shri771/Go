@@ -14,12 +14,19 @@ $ sudo pacman -S go postgresql
 Set up PostgreSQL and the Go environment:a. Configure PostgreSQL  
 ```bash
 $ sudo passwd postgres  # Set a password for the PostgreSQL user
-$ sudo systemctl start postgresql.service  # Start the PostgreSQL service```
+$ sudo systemctl start postgresql.service  # Start the PostgreSQL service
+```
 
 b. Create the Gator database  
-```$ sudo -u postgres psql  # Use psql to interact with the database # Inside the psql prompt: $ CREATE DATABASE gator; $ALTER USER postgres PASSWORD 'postgres';```
+```bash
+$ sudo -u postgres psql  # Use psql to interact with the database # Inside the psql prompt:
+$ CREATE DATABASE gator; $ALTER USER postgres PASSWORD 'postgres';
+```
 
 c. Install Goose for migrations and sqlc for converting SQL queries to Go code  
-```$ go install github.com/pressly/goose/v3/cmd/goose@latest $ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest```
+```bash
+$ go install github.com/pressly/goose/v3/cmd/goose@latest
+$ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+```
 
 
