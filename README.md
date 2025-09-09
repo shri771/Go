@@ -4,6 +4,7 @@ This repository contains a collection of my projects, and learning exercises in 
 The goal of this repo is to document my journey with Go while building practical applications, utilities, and exploring language features like concurrency, modules, and APIs.
 
 ##Installing and Running Guide for Blog Aggregator (Gator) ⚡
+---
 ###📦 Installation
 ---
 
