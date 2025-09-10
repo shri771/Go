@@ -12,7 +12,7 @@ You will need PostgreSQL and Go installed on your system to run Gator.For Arch-b
 ```$ sudo pacman -S go postgresql```
 
 
-Set up PostgreSQL and the Go environment:
+Set up PostgreSQL and the Go environment:<br>
 a. Configure PostgreSQL
 ```bash
 $ sudo passwd postgres  # Set a password for the PostgreSQL user
@@ -37,19 +37,19 @@ d. Clone this repo
     cd Go/BlogAggregator
 ```
 ### 🚀 Usage
-First you need to create user and then you can run other cmds.
+First you need to create user and then you can run other cmds.<br>
 ***Here are cmds you can try.***
 ```bash
-go run . login
-go run . register
-go run . reset
-go run . users
-go run . agg
-go run . addfeed
-go run . feeds
-go run . follow
-go run . following
-go run . unfollow
+   $ go run . login *usrename*      #Login a  user
+   $ go run . register *username*             #register a user
+   $ go run . reset                 # Reset database use with caution
+   $ go run . users                 # List registed user
+   $ go run . agg   *1s*                # Aggregate the feed every 1 sec
+   $ go run . addfeed *name_feed* *user*             # Add New feed
+   $ go run . feeds                # List feed for current user
+   $ go run . follow   *url*             # Follow a feed
+   $ go run . following         # Following feed
+   $ go run . unfollow  *url*            # unfollow Feed
 
 ```
 
