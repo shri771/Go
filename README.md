@@ -40,7 +40,7 @@ d. Clone this repo
 First you need to create user and then you can run other cmds.<br>
 ***Here are cmds you can try.***
 ```bash
-   $ go run . login *usrename*      #Login a  user
+   $ go run . login ___usrename___    #Login a  user
    $ go run . register *username*             #register a user
    $ go run . reset                 # Reset database use with caution
    $ go run . users                 # List registed user
