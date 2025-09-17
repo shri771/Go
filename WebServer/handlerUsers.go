@@ -6,14 +6,25 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/shri771/Go/WebServer/internal/database"
 )
+
+type User struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
+}
 
 func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	type users struct {
 		Email string `json:"email"`
 	}
 
+	type response struct {
+		User
+	}
 	//Decode Json
 	user := users{}
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -34,5 +45,12 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Encode Json
-	respondWithJSON(w, http.StatusOK, addedUser)
+	respondWithJSON(w, http.StatusCreated, response{
+		User: User{
+			ID:        addedUser.ID,
+			CreatedAt: addedUser.CreatedAt,
+			UpdatedAt: addedUser.UpdatedAt,
+			Email:     addedUser.Email,
+		},
+	})
 }

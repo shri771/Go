@@ -8,3 +8,9 @@ RETURNING
 
 -- name: DelUser :exec
 DELETE FROM users;
+
+-- name: AllUser :many
+SELECT
+  *
+FROM
+  users;

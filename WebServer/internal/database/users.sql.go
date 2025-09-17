@@ -10,6 +10,41 @@ import (
 	"time"
 )
 
+const allUser = `-- name: AllUser :many
+SELECT
+  id, created_at, updated_at, email
+FROM
+  users
+`
+
+func (q *Queries) AllUser(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, allUser)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO
   users (id, created_at, updated_at, email)
