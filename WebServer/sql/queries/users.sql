@@ -5,3 +5,6 @@ VALUES
   (gen_random_uuid(), $1, $2, $3)
 RETURNING
   *;
+
+-- name: DelUser :exec
+DELETE FROM users;

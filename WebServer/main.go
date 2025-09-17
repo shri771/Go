@@ -1,16 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"sync/atomic"
 
 	_ "github.com/lib/pq"
+	"github.com/shri771/Go/WebServer/internal/database"
 )
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
+	db             *database.Queries
+	platform       string
 }
 
 func main() {
@@ -19,8 +24,22 @@ func main() {
 	const port = "1030"
 	mux := http.NewServeMux()
 
+	// Database
+	dbURL := os.Getenv("DB_URL")
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("Could not Open conection to Database: %w", err)
+	}
+
+	platform := os.Getenv("PLATFORM")
+	if platform == "" {
+		log.Fatal("PLATFORM must be set")
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
+		db:             database.New(db),
+		platform:       platform,
 	}
 
 	srv := &http.Server{
@@ -29,11 +48,17 @@ func main() {
 	}
 
 	// Handlers
+	// App
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
-	mux.HandleFunc("GET /api/healthz", handlerReadiness)
+
+	// admin
 	mux.HandleFunc("GET /admin/metrics", http.HandlerFunc(apiCfg.handlerMetrics))
 	mux.HandleFunc("POST /admin/reset", http.HandlerFunc(apiCfg.handlerReset))
+
+	// api
+	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("POST /api/validate_chirp", http.HandlerFunc(handlerChirpsValidate))
+	mux.HandleFunc("POST /api/users", http.HandlerFunc(apiCfg.handlerUsers))
 
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)
