@@ -29,6 +29,7 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
+
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -61,8 +62,10 @@ func main() {
 
 	// api
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
-	mux.HandleFunc("POST /api/validate_chirp", http.HandlerFunc(handlerChirpsValidate))
+	mux.HandleFunc("POST /api/chirps", http.HandlerFunc(apiCfg.handlerChirps))
+	mux.HandleFunc("GET /api/chirps", http.HandlerFunc(apiCfg.handlerChirps))
 	mux.HandleFunc("POST /api/users", http.HandlerFunc(apiCfg.handlerUsers))
+	mux.HandleFunc("GET /api/chirps/{chirpID}", http.HandlerFunc(apiCfg.handlerChirpsID))
 
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)
