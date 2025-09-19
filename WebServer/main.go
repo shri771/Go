@@ -66,6 +66,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", http.HandlerFunc(apiCfg.handlerChirps))
 	mux.HandleFunc("POST /api/users", http.HandlerFunc(apiCfg.handlerUsers))
 	mux.HandleFunc("GET /api/chirps/{chirpID}", http.HandlerFunc(apiCfg.handlerChirpsID))
+	mux.HandleFunc("POST /api/login", http.HandlerFunc(apiCfg.handlerLogin))
 
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)

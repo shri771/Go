@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shri771/Go/WebServer/internal/auth"
 	"github.com/shri771/Go/WebServer/internal/database"
 )
 
@@ -19,7 +20,8 @@ type User struct {
 
 func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	type users struct {
-		Email string `json:"email"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	type response struct {
@@ -34,10 +36,17 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	hashedPassword, err := auth.HashPassword(user.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error with hashing pswd", err)
+		return
+	}
+
 	addedUser, err := cfg.db.CreateUser(context.Background(), database.CreateUserParams{
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Email:     user.Email,
+		CreatedAt:      time.Now().UTC(),
+		UpdatedAt:      time.Now().UTC(),
+		Email:          user.Email,
+		HashedPassword: hashedPassword,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error with Adding user:", err)
@@ -53,4 +62,43 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 			Email:     addedUser.Email,
 		},
 	})
+}
+
+func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
+	type users struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	// Decode Data
+	loginCredintial := users{}
+
+	err := json.NewDecoder(r.Body).Decode(&loginCredintial)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Error with decoding json", err)
+		return
+	}
+	defer r.Body.Close()
+
+	// Query database
+	login, err := cfg.db.GetUserByEmail(context.Background(), loginCredintial.Email)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Error while quering database", err)
+		return
+	}
+
+	// Verify user
+	err = auth.CheckPasswordHash(loginCredintial.Password, login.HashedPassword)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Error while quering database", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, User{
+		ID:        login.ID,
+		CreatedAt: login.CreatedAt,
+		UpdatedAt: login.UpdatedAt,
+		Email:     login.Email,
+	})
+
 }
