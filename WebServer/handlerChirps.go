@@ -70,7 +70,7 @@ func (cfg *apiConfig) handlerChirps(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := auth.ValidateJWT(token, cfg.secret)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Could not Validate JWT", err)
+		respondWithError(w, http.StatusUnauthorized, "Could not Validate JWT", err)
 		return
 	}
 

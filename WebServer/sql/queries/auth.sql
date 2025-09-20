@@ -19,3 +19,22 @@ VALUES
   )
 RETURNING
   *;
+
+-- name: GetUserFromRefreshToken :one
+SELECT
+  user_id,
+  expires_at
+FROM
+  refresh_tokens
+WHERE
+  token = $1;
+
+-- name: RevokeByToken :one
+UPDATE refresh_tokens
+SET
+  updated_at = CURRENT_TIMESTAMP,
+  revoked_at = CURRENT_TIMESTAMP
+WHERE
+  token = $1
+RETURNING
+  *;

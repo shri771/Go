@@ -54,3 +54,50 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 	)
 	return i, err
 }
+
+const getUserFromRefreshToken = `-- name: GetUserFromRefreshToken :one
+SELECT
+  user_id,
+  expires_at
+FROM
+  refresh_tokens
+WHERE
+  token = $1
+`
+
+type GetUserFromRefreshTokenRow struct {
+	UserID    uuid.UUID
+	ExpiresAt time.Time
+}
+
+func (q *Queries) GetUserFromRefreshToken(ctx context.Context, token string) (GetUserFromRefreshTokenRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserFromRefreshToken, token)
+	var i GetUserFromRefreshTokenRow
+	err := row.Scan(&i.UserID, &i.ExpiresAt)
+	return i, err
+}
+
+const revokeByToken = `-- name: RevokeByToken :one
+UPDATE refresh_tokens
+SET
+  updated_at = CURRENT_TIMESTAMP,
+  revoked_at = CURRENT_TIMESTAMP
+WHERE
+  token = $1
+RETURNING
+  token, created_at, updated_at, user_id, expires_at, revoked_at
+`
+
+func (q *Queries) RevokeByToken(ctx context.Context, token string) (RefreshToken, error) {
+	row := q.db.QueryRowContext(ctx, revokeByToken, token)
+	var i RefreshToken
+	err := row.Scan(
+		&i.Token,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+	)
+	return i, err
+}
