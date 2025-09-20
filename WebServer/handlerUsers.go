@@ -12,11 +12,12 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Token     string    `json:"token"`
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	Email        string    `json:"email"`
+	Token        string    `json:"token"`
+	RefreshToken string    `json:"refresh_token"`
 }
 
 func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
@@ -67,9 +68,8 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	type users struct {
-		Email     string        `json:"email"`
-		Password  string        `json:"password"`
-		ExpiresIn time.Duration `json:"expires_in_seconds"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	// Decode Data
@@ -80,13 +80,6 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	// Set expires in
-	if loginCredintial.ExpiresIn == 0 {
-		loginCredintial.ExpiresIn = 1 * time.Hour
-	} else if loginCredintial.ExpiresIn > 1*time.Hour {
-		loginCredintial.ExpiresIn = 1 * time.Hour
-	}
 
 	// Query database
 	login, err := cfg.db.GetUserByEmail(context.Background(), loginCredintial.Email)
@@ -103,16 +96,31 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create JWT
-	token, err := auth.MakeJWT(login.ID, cfg.secret, loginCredintial.ExpiresIn)
+	token, err := auth.MakeJWT(login.ID, cfg.secret, 1*time.Hour)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error while Genarating JWT token", err)
 	}
+
+	// Create and Store Refreh token
+	refreshToken, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not genrate refrest tokens", err)
+		return
+	}
+
+	refreshTokenData, err := cfg.db.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{
+		Token:     refreshToken,
+		UserID:    login.ID,
+		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
+	})
+
 	respondWithJSON(w, http.StatusOK, User{
-		ID:        login.ID,
-		CreatedAt: login.CreatedAt,
-		UpdatedAt: login.UpdatedAt,
-		Email:     login.Email,
-		Token:     token,
+		ID:           login.ID,
+		CreatedAt:    login.CreatedAt,
+		UpdatedAt:    login.UpdatedAt,
+		Email:        login.Email,
+		Token:        token,
+		RefreshToken: refreshTokenData.Token,
 	})
 
 }
