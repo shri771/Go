@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shri771/Go/WebServer/internal/auth"
 	"github.com/shri771/Go/WebServer/internal/database"
 )
 
@@ -54,32 +55,45 @@ func (cfg *apiConfig) handlerChirps(w http.ResponseWriter, r *http.Request) {
 
 	// Types
 	type parameters struct {
-		Body   string    `json:"body"`
-		UserId uuid.UUID `json:"user_id"`
+		Body string `json:"body"`
 	}
 	type returnVals struct {
 		CleanedBody string `json:"cleaned_body"`
 	}
 
+	// Verify User
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Could not retrive Auth header", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.secret)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not Validate JWT", err)
+		return
+	}
+
 	// Decode Data
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
 	}
 
+	// Filter Chirps
 	cleaned := validateChirps(w, params.Body)
 	if cleaned == "" {
 		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
-	// Add Valid Chiprs to database
+	// Add Filtered Chiprs to database
 	addedChipr, err := cfg.db.AddChirp(context.Background(), database.AddChirpParams{
 		Body:   cleaned,
-		UserID: params.UserId,
+		UserID: userID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Could not add Chirp to database", err)

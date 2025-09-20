@@ -17,6 +17,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	db             *database.Queries
 	platform       string
+	secret         string
 }
 
 func main() {
@@ -41,10 +42,16 @@ func main() {
 		log.Fatal("PLATFORM must be set")
 	}
 
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		log.Fatalf("Secret must be set")
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 		db:             database.New(db),
 		platform:       platform,
+		secret:         secret,
 	}
 
 	srv := &http.Server{
@@ -62,11 +69,11 @@ func main() {
 
 	// api
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
-	mux.HandleFunc("POST /api/chirps", http.HandlerFunc(apiCfg.handlerChirps))
-	mux.HandleFunc("GET /api/chirps", http.HandlerFunc(apiCfg.handlerChirps))
-	mux.HandleFunc("POST /api/users", http.HandlerFunc(apiCfg.handlerUsers))
-	mux.HandleFunc("GET /api/chirps/{chirpID}", http.HandlerFunc(apiCfg.handlerChirpsID))
-	mux.HandleFunc("POST /api/login", http.HandlerFunc(apiCfg.handlerLogin))
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirps)
+	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirps)
+	mux.HandleFunc("POST /api/users", apiCfg.handlerUsers)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpsID)
+	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)
