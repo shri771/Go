@@ -23,7 +23,8 @@ RETURNING
 -- name: GetUserFromRefreshToken :one
 SELECT
   user_id,
-  expires_at
+  expires_at,
+  revoked_at
 FROM
   refresh_tokens
 WHERE
