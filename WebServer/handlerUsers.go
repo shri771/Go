@@ -38,24 +38,18 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if r.Method == "POST" {
-		// Valdidate JWT
-		accessToken, err := auth.GetBearerToken(r.Header)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "Could not retrive token from auth header", err)
-			return
-		}
-
-		userID, err := auth.ValidateJWT(accessToken, cfg.secret)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "Could not retrive token from auth header", err)
-			return
-		}
+	if r.Method == "PUT" {
 
 		// Hash Password and Add User to Database
 		hashedPassword, err := auth.HashPassword(user.Password)
 		if err != nil {
 			respondWithError(w, http.StatusUnauthorized, "Error with hashing pswd", err)
+			return
+		}
+
+		userID, err := cfg.AuthorizeUser(w, r.Header)
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, "Could not retrive token from auth header", err)
 			return
 		}
 
@@ -73,6 +67,8 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 				Email:     updatedUser.Email,
 			},
 		})
+
+		return
 
 	}
 	// Hash Password and Add User to Database
@@ -160,4 +156,20 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshTokenData.Token,
 	})
 
+}
+
+// Helpers
+func (cfg *apiConfig) AuthorizeUser(w http.ResponseWriter, header http.Header) (uuid.UUID, error) {
+	// Valdidate JWT
+	accessToken, err := auth.GetBearerToken(header)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	userID, err := auth.ValidateJWT(accessToken, cfg.secret)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return userID, nil
 }

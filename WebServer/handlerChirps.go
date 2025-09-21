@@ -117,6 +117,36 @@ func (cfg *apiConfig) handlerChirpsID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Method == "DELETE" {
+
+		// Check if Chipr exist
+		_, err := cfg.db.GetChiprByID(context.Background(), chirpID)
+		if err != nil {
+			respondWithError(w, http.StatusNotFound, "Chipr Dose not exist", err)
+			return
+		}
+
+		// Authorize User
+		userID, err := cfg.AuthorizeUser(w, r.Header)
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, "This user does not have this chipr", err)
+			return
+		}
+
+		// Delete chipr
+		err = cfg.db.DeleteChiprByID(context.Background(), database.DeleteChiprByIDParams{
+			ID:     chirpID,
+			UserID: userID,
+		})
+		if err != nil {
+			respondWithError(w, http.StatusForbidden, "Either User dose not exist or chipr", err)
+			return
+		}
+
+		respondWithJSON(w, http.StatusNoContent, Chirp{})
+		return
+	}
+
 	chirp, err := cfg.db.GetChiprByID(context.Background(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Error with getting Chirp by Id:", err)
