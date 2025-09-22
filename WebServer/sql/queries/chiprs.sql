@@ -31,5 +31,4 @@ WHERE
 -- name: DeleteChiprByID :exec
 DELETE FROM chiprs
 WHERE
-  id = $1
-  OR user_id = $2;
+  id = $1;

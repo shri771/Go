@@ -47,7 +47,7 @@ func (cfg *apiConfig) handlerUsers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		userID, err := cfg.AuthorizeUser(w, r.Header)
+		userID, err := cfg.getUserIDJWT(r.Header)
 		if err != nil {
 			respondWithError(w, http.StatusUnauthorized, "Could not retrive token from auth header", err)
 			return
@@ -156,20 +156,4 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		RefreshToken: refreshTokenData.Token,
 	})
 
-}
-
-// Helpers
-func (cfg *apiConfig) AuthorizeUser(w http.ResponseWriter, header http.Header) (uuid.UUID, error) {
-	// Valdidate JWT
-	accessToken, err := auth.GetBearerToken(header)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	userID, err := auth.ValidateJWT(accessToken, cfg.secret)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return userID, nil
 }

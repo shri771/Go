@@ -48,16 +48,10 @@ const deleteChiprByID = `-- name: DeleteChiprByID :exec
 DELETE FROM chiprs
 WHERE
   id = $1
-  OR user_id = $2
 `
 
-type DeleteChiprByIDParams struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
-}
-
-func (q *Queries) DeleteChiprByID(ctx context.Context, arg DeleteChiprByIDParams) error {
-	_, err := q.db.ExecContext(ctx, deleteChiprByID, arg.ID, arg.UserID)
+func (q *Queries) DeleteChiprByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteChiprByID, id)
 	return err
 }
 
