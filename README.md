@@ -5,7 +5,9 @@ The goal of this repo is to document my journey with Go while building practical
 
 ## Projects
 
+
 ### WebServer (X clone)
+
 
 **Features:**
 - A simple web server built in Go.
@@ -17,6 +19,7 @@ The goal of this repo is to document my journey with Go while building practical
 
 ### BlogAggregator(Gator)
 
+
 **Features:**
 - User registration and login
 - Add, list, follow, and unfollow RSS feeds
@@ -24,7 +27,7 @@ The goal of this repo is to document my journey with Go while building practical
 - Reset the database
 
 <details>
-<summary>Documentation</summary>
+<summary>Installation</summary>
 
 ### 📦 Installation
 
@@ -79,6 +82,7 @@ te
 </details>
 
 ### Pokedexcli
+
 
 **Features:**
 - A CLI-based Pokedex application.

@@ -31,6 +31,7 @@ func main() {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
 
+	// Environment Variables
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
