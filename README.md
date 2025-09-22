@@ -4,9 +4,10 @@ This repository contains a collection of my projects, and learning exercises in 
 The goal of this repo is to document my journey with Go while building practical applications, utilities, and exploring language features like concurrency, modules, and APIs.
 
 ## Projects
+---
 
 ### WebServer (X clone)
----
+
 
 **Features:**
 - A simple web server built in Go.
@@ -17,7 +18,7 @@ The goal of this repo is to document my journey with Go while building practical
 - Uses sqlc to generate type-safe Go code from raw SQL queries.
 
 ### BlogAggregator(Gator)
----
+
 
 **Features:**
 - User registration and login
@@ -81,7 +82,7 @@ te
 </details>
 
 ### Pokedexcli
------
+
 
 **Features:**
 - A CLI-based Pokedex application.
