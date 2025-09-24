@@ -27,15 +27,15 @@ func main() {
 	const port = "1030"
 	mux := http.NewServeMux()
 
-	// Database
+	// Load Enviroment Var's
 	if err := godotenv.Load(); err != nil {
-		log.Printf("Warning: .env file not found: %v", err)
+		log.Fatalf("Warning: .env file not found: %v", err)
 	}
-
+	// Database
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatalf("Could not Open conection to Database: %w", err)
+		log.Fatalf("Could not Open conection to Database: %v", err)
 	}
 
 	platform := os.Getenv("PLATFORM")
@@ -45,12 +45,12 @@ func main() {
 
 	secret := os.Getenv("SECRET")
 	if secret == "" {
-		log.Fatalf("Secret must be set")
+		log.Fatal("Secret must be set")
 	}
 
 	polkaKey := os.Getenv("POLKA_KEY")
 	if polkaKey == "" {
-		log.Fatalf("Polkay key is not set")
+		log.Fatal("Polkay key is not set")
 	}
 
 	apiCfg := apiConfig{

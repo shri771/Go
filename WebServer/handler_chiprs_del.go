@@ -14,14 +14,14 @@ func (cfg *apiConfig) handlerChirpsDel(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Error with converting to uuid:", err)
 		return
 	}
-	// Authorize User
+	// Validate  User
 	userID, err := cfg.getUserIDJWT(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "This user does not have this chipr", err)
 		return
 	}
 
-	// Check if Chipr exist
+	// Check if Chipr exist and belong to that user
 	dbChipr, err := cfg.db.GetChiprByID(context.Background(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Chipr Dose not exist", err)
@@ -29,6 +29,7 @@ func (cfg *apiConfig) handlerChirpsDel(w http.ResponseWriter, r *http.Request) {
 	}
 	if dbChipr.UserID != userID {
 		respondWithError(w, http.StatusForbidden, "You are not authorized to do so", err)
+		return
 	}
 
 	// Delete chipr
