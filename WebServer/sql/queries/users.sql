@@ -39,3 +39,10 @@ WHERE
   id = $3
 RETURNING
   *;
+
+-- name: UpdateUserByID :exec
+UPDATE users
+SET
+  is_chipry_red = true
+WHERE
+  id = $1;

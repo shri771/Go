@@ -26,7 +26,6 @@ func HashPassword(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return string(hasdedPsword), nil
 }
 
@@ -109,4 +108,18 @@ func MakeRefreshToken() (string, error) {
 
 	return encodedstr, nil
 
+}
+
+// Get Api key from request
+func GetAPIKey(headers http.Header) (string, error) {
+	authHeader := headers.Get("Authorization")
+	if authHeader == "" {
+		return "", errors.New("Does not have auth header")
+	}
+	splitAuth := strings.Split(authHeader, " ")
+	if len(splitAuth) < 2 || splitAuth[0] != "ApiKey" {
+		return "", errors.New("malformed authorization header")
+	}
+
+	return splitAuth[1], nil
 }

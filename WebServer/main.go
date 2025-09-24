@@ -18,6 +18,7 @@ type apiConfig struct {
 	db             *database.Queries
 	platform       string
 	secret         string
+	pokaKey        string
 }
 
 func main() {
@@ -31,7 +32,6 @@ func main() {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
 
-	// Environment Variables
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
@@ -48,11 +48,17 @@ func main() {
 		log.Fatalf("Secret must be set")
 	}
 
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		log.Fatalf("Polkay key is not set")
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 		db:             database.New(db),
 		platform:       platform,
 		secret:         secret,
+		pokaKey:        polkaKey,
 	}
 
 	srv := &http.Server{
@@ -76,11 +82,13 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpsRetrivew)
 	mux.HandleFunc("DELETE /api/chirps/{chirpID}", apiCfg.handlerChirpsDel)
 
-	mux.HandleFunc("POST /api/users", apiCfg.handlerUsers)
-	mux.HandleFunc("PUT /api/users", apiCfg.handlerUsers)
+	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
+	mux.HandleFunc("PUT /api/users", apiCfg.handlerUsersUpdate)
+
 	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
+	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerWebhooks)
 
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)

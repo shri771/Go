@@ -14,7 +14,7 @@ import (
 
 const allUser = `-- name: AllUser :many
 SELECT
-  id, created_at, updated_at, email, hashed_password
+  id, created_at, updated_at, email, hashed_password, is_chipry_red
 FROM
   users
 `
@@ -34,6 +34,7 @@ func (q *Queries) AllUser(ctx context.Context) ([]User, error) {
 			&i.UpdatedAt,
 			&i.Email,
 			&i.HashedPassword,
+			&i.IsChipryRed,
 		); err != nil {
 			return nil, err
 		}
@@ -60,7 +61,7 @@ INSERT INTO
 VALUES
   (gen_random_uuid(), $1, $2, $3, $4)
 RETURNING
-  id, created_at, updated_at, email, hashed_password
+  id, created_at, updated_at, email, hashed_password, is_chipry_red
 `
 
 type CreateUserParams struct {
@@ -84,6 +85,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChipryRed,
 	)
 	return i, err
 }
@@ -99,7 +101,7 @@ func (q *Queries) DelUser(ctx context.Context) error {
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
-  id, created_at, updated_at, email, hashed_password
+  id, created_at, updated_at, email, hashed_password, is_chipry_red
 FROM
   users
 WHERE
@@ -115,6 +117,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChipryRed,
 	)
 	return i, err
 }
@@ -128,7 +131,7 @@ SET
 WHERE
   id = $3
 RETURNING
-  id, created_at, updated_at, email, hashed_password
+  id, created_at, updated_at, email, hashed_password, is_chipry_red
 `
 
 type UpdateUserParams struct {
@@ -146,6 +149,20 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChipryRed,
 	)
 	return i, err
+}
+
+const updateUserByID = `-- name: UpdateUserByID :exec
+UPDATE users
+SET
+  is_chipry_red = true
+WHERE
+  id = $1
+`
+
+func (q *Queries) UpdateUserByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, updateUserByID, id)
+	return err
 }
