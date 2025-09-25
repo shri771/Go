@@ -53,6 +53,7 @@ func (cfg *apiConfig) handlerRefresh(w http.ResponseWriter, r *http.Request) {
 
 // Revoke
 func (cfg *apiConfig) handlerRevoke(w http.ResponseWriter, r *http.Request) {
+
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Could retrive auth header", err)

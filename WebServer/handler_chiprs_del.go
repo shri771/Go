@@ -21,7 +21,7 @@ func (cfg *apiConfig) handlerChirpsDel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if Chipr exist and belong to that user
+	// Check if Chipr exist
 	dbChipr, err := cfg.db.GetChiprByID(context.Background(), chirpID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Chipr Dose not exist", err)

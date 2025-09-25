@@ -68,3 +68,38 @@ func (cfg *apiConfig) handlerChirpsRetrivew(w http.ResponseWriter, r *http.Reque
 		UserID:    chirp.UserID,
 	})
 }
+
+// Get Chiprs by Author Id
+func (cfg *apiConfig) handlerChiprsAuthor(w http.ResponseWriter, r *http.Request) {
+	s := r.URL.Query().Get("author_id")
+	if s == "" {
+		cfg.handlerChirpsGet(w, r)
+	}
+
+	userID, err := uuid.Parse(s)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Problming with parsing url", err)
+		return
+	}
+
+	// Retrive Chiprs
+	requestChirps, err := cfg.db.GetChiprByUserID(context.Background(), userID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Could not retrive chiprs from database", err)
+		return
+	}
+
+	// Curate Chiprs
+	jsonChirp := []Chirp{}
+	for _, chirp := range requestChirps {
+		jsonChirp = append(jsonChirp, Chirp{
+			ID:        chirp.ID,
+			CreatedAt: chirp.CreatedAt,
+			UpdatedAt: chirp.UpdatedAt,
+			Body:      chirp.Body,
+			UserID:    chirp.UserID,
+		})
+	}
+
+	respondWithJSON(w, http.StatusOK, jsonChirp)
+}

@@ -114,3 +114,41 @@ func (q *Queries) GetChiprByID(ctx context.Context, id uuid.UUID) (Chipr, error)
 	)
 	return i, err
 }
+
+const getChiprByUserID = `-- name: GetChiprByUserID :many
+SELECT
+  id, created_at, updated_at, body, user_id
+FROM
+  chiprs
+WHERE
+  user_id = $1
+`
+
+func (q *Queries) GetChiprByUserID(ctx context.Context, userID uuid.UUID) ([]Chipr, error) {
+	rows, err := q.db.QueryContext(ctx, getChiprByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Chipr
+	for rows.Next() {
+		var i Chipr
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Body,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

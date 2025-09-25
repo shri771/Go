@@ -32,3 +32,11 @@ WHERE
 DELETE FROM chiprs
 WHERE
   id = $1;
+
+-- name: GetChiprByUserID :many
+SELECT
+  *
+FROM
+  chiprs
+WHERE
+  user_id = $1;
