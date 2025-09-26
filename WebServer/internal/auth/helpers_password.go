@@ -52,12 +52,12 @@ func MakeJWT(
 
 // ValidateJWT -
 func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
-	claimsStruct := jwt.RegisteredClaims{}
+	claimsStruct := jwt.RegisteredClaims{} // This satisfes the Claimn interface
 	token, err := jwt.ParseWithClaims(
 		tokenString,
 		&claimsStruct,
 		func(token *jwt.Token) (interface{}, error) { return []byte(tokenSecret), nil },
-	)
+	) // In this keyfunc( the input func) because we could dynacillay return key by adding diffrent condition
 	if err != nil {
 		return uuid.Nil, err
 	}

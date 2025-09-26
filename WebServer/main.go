@@ -92,7 +92,6 @@ func main() {
 	// Logs
 	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)
 	log.Fatal(srv.ListenAndServe()) // When there a request this calls the ServerMux's method servehttp.
-
 }
 
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
