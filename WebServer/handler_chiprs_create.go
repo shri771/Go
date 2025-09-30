@@ -38,6 +38,7 @@ func (cfg *apiConfig) handlerChirpsAdd(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
 	}
+	r.Body.Close()
 
 	// Filter Chirps
 	cleaned := validateChirps(w, params.Body)

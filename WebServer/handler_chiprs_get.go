@@ -74,6 +74,7 @@ func (cfg *apiConfig) handlerChiprsAuthor(w http.ResponseWriter, r *http.Request
 	s := r.URL.Query().Get("author_id")
 	if s == "" {
 		cfg.handlerChirpsGet(w, r)
+		return
 	}
 
 	userID, err := uuid.Parse(s)
