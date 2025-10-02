@@ -16,8 +16,8 @@ func (cfg *apiConfig) handlerWebhooks(w http.ResponseWriter, r *http.Request) {
 		UserID uuid.UUID `json:"user_id"`
 	}
 	type Response struct {
-		Event string `json:"event"`
-		Data  data   `json:"data"`
+		Event string `json:"event,omitempty"`
+		Data  data   `json:"data,omitempty"`
 	}
 
 	// Validate Request
