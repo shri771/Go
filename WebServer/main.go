@@ -8,6 +8,7 @@ import (
 	"os"
 	"sync/atomic"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/shri771/Go/WebServer/internal/database"
 )
@@ -20,17 +21,16 @@ type apiConfig struct {
 	pokaKey        string
 }
 
-// main function
 func main() {
 	// Setup defaults
-	// const filepathRoot = '.'
+	const filepathRoot = '.'
 	const port = "1030"
 	mux := http.NewServeMux()
 
-	// // Load Enviroment Var's
-	// if err := godotenv.Load(); err != nil {
-	// 	log.Fatalf("Warning: .env file not found: %v", err)
-	// }
+	// Load Enviroment Var's
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Warning: .env file not found: %v", err)
+	}
 	// Database
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
@@ -68,7 +68,7 @@ func main() {
 
 	// Handlers
 	// App
-	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir("")))))
+	mux.Handle("/app/", apiCfg.middlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))))
 
 	// admin
 	mux.HandleFunc("GET /admin/metrics", http.HandlerFunc(apiCfg.handlerMetrics))
@@ -90,11 +90,11 @@ func main() {
 	mux.HandleFunc("POST /api/polka/webhooks", apiCfg.handlerWebhooks)
 
 	// Logs
-	log.Printf("Serving on port: %s from \n", port)
+	log.Printf("Serving on port: %s from %v\n", port, filepathRoot)
 	log.Fatal(srv.ListenAndServe()) // When there a request this calls the ServerMux's method servehttp.
+
 }
 
-// handlerMetrics method
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -106,7 +106,6 @@ func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
 </html>`, cfg.fileserverHits.Load())))
 }
 
-// middlewareMetricsInc method
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cfg.fileserverHits.Add(1)

@@ -4,7 +4,7 @@ FROM debian:stable-slim
 COPY Docker /bin/goserver
 
  ## Env
-ENV PORT=8991
+ENV PORT=1030
 
 CMD ["/bin/goserver"]
 
