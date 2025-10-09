@@ -25,7 +25,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	// Set headers
 	req.Header.Add("User-Agent", "gator")
 
-	// Maek request
+	// Make request
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return &RSSFeed{}, err

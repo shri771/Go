@@ -12,6 +12,8 @@ func commandMapf(cfg *config, args ...string) error {
 		return err
 	}
 
+	fmt.Print("Started Collecting.... \n")
+
 	// Setting the values decoded by the ListLocations func
 	cfg.nextLocationsURL = locationsResp.Next
 	cfg.prevLocationsURL = locationsResp.Previous

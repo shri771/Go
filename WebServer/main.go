@@ -27,11 +27,11 @@ func main() {
 	const port = "1030"
 	mux := http.NewServeMux()
 
-	// Load Enviroment Var's
+	// Load Enviroment Variable
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Warning: .env file not found: %v", err)
 	}
-	// Database
+
 	dbURL := os.Getenv("DB_URL")
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {

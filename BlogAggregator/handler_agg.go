@@ -13,17 +13,17 @@ func handleragg(s *state, cmd command) error {
 		return fmt.Errorf("Enter atlest one argument")
 	}
 
-	ticker := time.NewTicker(time_between_reqs)
-	for range ticker.C {
-		scrapeFeeds(s)
-	}
-
 	time_between_reqs, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return fmt.Errorf("Could not context input to time.Duratino %w", err)
 	}
 
 	fmt.Printf("Collecting feeds every %v... \n", time_between_reqs)
+
+	ticker := time.NewTicker(time_between_reqs)
+	for range ticker.C {
+		scrapeFeeds(s)
+	}
 
 	return nil
 }

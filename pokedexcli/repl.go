@@ -19,6 +19,7 @@ type config struct {
 func startRepl(cfg *config) {
 	reader := bufio.NewScanner(os.Stdin)
 	for {
+		fmt.Println()
 		fmt.Print("Pokedex > ")
 		reader.Scan()
 
