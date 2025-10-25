@@ -12,7 +12,7 @@ The goal of this repo is to document my journey with Go while building practical
 **Features:**
 - A simple web server built in Go.
 - API endpoints for creating and retrieving "tweets".
-- User creation and management.
+- User creation and management..
 - **JWT-based** authentication with refresh tokens.
  - Secure login with password hashing using bcrypt.
 - Uses sqlc to generate type-safe Go code from raw SQL queries.

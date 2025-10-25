@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chirpy</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Chirpy</h1>
+    </header>
+
+    <main>
+        <div id="auth-container">
+            <h2>Login or Register</h2>
+            <form id="login-form">
+                <h3>Login</h3>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <hr>
+            <form id="register-form">
+                <h3>Register</h3>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <button type="submit">Register</button>
+            </form>
+        </div>
+
+        <div id="chirp-container" class="hidden">
+            <h2>Post a Chirp</h2>
+            <form id="chirp-form">
+                <textarea id="chirp-body" placeholder="What's happening?" maxlength="140" required></textarea>
+                <button type="submit">Chirp</button>
+            </form>
+        </div>
+
+        <div id="feed-container">
+            <h2>Feed</h2>
+            <div id="chirps-feed">
+                <!-- Chirps will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
