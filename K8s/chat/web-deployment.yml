@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: synergychat-web
+  name: synergychat-web
+spec:
+  selector:
+    matchLabels:
+      app: synergychat-web
+  template:
+    metadata:
+      labels:
+        app: synergychat-web
+    spec:
+      containers:
+        - image: bootdotdev/synergychat-web:latest
+          name: synergychat-web
+          envFrom:
+            - configMapRef:
+                name: synergychat-web-configmap
+          resources:
+            limits:
+              cpu: 50m
+              memory: 200Mi
